@@ -5,6 +5,8 @@
 
 A development tool that provides a fake Cloudflare Zaraz consent management system for local development. Perfect for testing consent-dependent features without requiring a live Zaraz instance.
 
+**🌐 [Try the online demo →](https://pod666.github.io/fake-cloudflare-zaraz-consent/)**
+
 > **📚 API Reference**: This package implements the official [Cloudflare Zaraz Consent Management API](https://developers.cloudflare.com/zaraz/consent-management/api/). All methods and behaviors match the production Zaraz consent system.
 
 ## ✨ Features
@@ -110,8 +112,6 @@ const isFake = zaraz.constructor.name.includes('Fake');
 ```
 
 ## 🎮 Live Demo
-
-**🌐 [Try the online demo →](https://pod666.github.io/fake-cloudflare-zaraz-consent/)**
 
 Experience the package in action with our interactive demo, or run it locally:
 
