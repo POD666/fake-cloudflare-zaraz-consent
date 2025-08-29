@@ -16,6 +16,9 @@ A development tool that provides a fake Cloudflare Zaraz consent management syst
 - 📝 **Rich TypeScript support** with comprehensive type definitions
 - 🚀 **Zero dependencies** - lightweight and fast
 - 🎨 **Accessible UI** with keyboard navigation and focus trapping
+- ⚡ **Direct zaraz-ts integration** - All functions exported directly for seamless usage
+- 🛠️ **Development utilities** - Shared constants, logging helpers, and validation functions
+- 🎯 **DRY compliant codebase** - Centralized utilities eliminate code duplication
 
 ## 🚀 Quick Start
 
@@ -49,6 +52,61 @@ quickSetup({
   autoShow: true, // Show modal automatically
   enableLogging: true, // Enable console logging
 });
+```
+
+### 🚀 Enhanced Setup with zaraz-ts
+
+This package now includes **direct integration** with [zaraz-ts](https://www.npmjs.com/package/zaraz-ts). Import functions directly from that package:
+
+```typescript
+// Import fake Zaraz setup functions
+import {
+  quickSetup,
+  initializeZarazConsentTools,
+  // Shared utilities
+  DEMO_PURPOSES,
+  createLogger,
+} from 'fake-cloudflare-zaraz-consent';
+
+// Import zaraz-ts functions directly
+import {
+  waitForConsentAPI,
+  ifConsentGranted,
+  loadScriptIfConsent,
+  createGlobalConsentTools,
+  debugConsentState,
+  onConsentChange,
+  getAllConsent,
+  setConsentPreferences,
+} from 'zaraz-ts';
+
+// Setup fake Zaraz with shared demo purposes
+const zaraz = quickSetup({
+  autoShow: true,
+  enableLogging: true,
+});
+
+// Wait for API to be ready
+await waitForConsentAPI();
+
+// Enable browser console debugging tools
+await createGlobalConsentTools();
+
+// Use advanced features directly
+await loadScriptIfConsent('analytics', 'https://analytics.js');
+await ifConsentGranted('marketing', () => {
+  console.log('Marketing enabled!');
+});
+
+// Debug current state
+await debugConsentState();
+
+// Use shared utilities
+const logger = createLogger('My App', true);
+logger.log('App initialized');
+
+// Check if using fake implementation
+const isFake = zaraz.constructor.name.includes('Fake');
 ```
 
 ## 🎮 Live Demo
@@ -125,6 +183,34 @@ quickSetup({
 });
 ```
 
+#### 🚀 NEW! `quickSetupWithTools(options?)`
+
+Enhanced quick setup that integrates with zaraz-ts for additional functionality.
+
+```typescript
+import { quickSetupWithTools } from 'fake-cloudflare-zaraz-consent';
+
+const { zaraz, tools } = await quickSetupWithTools({
+  autoShow: true,
+  enableLogging: true,
+  enableGlobalTools: true, // Enables window.zarazConsentTools
+});
+```
+
+#### 🚀 NEW! `initializeWithTools(config?)`
+
+Full initialization with enhanced tools integration.
+
+```typescript
+import { initializeWithTools } from 'fake-cloudflare-zaraz-consent';
+
+const { zaraz, tools } = await initializeWithTools({
+  purposes: [...],
+  defaultConsent: {...},
+  enableLogging: true,
+});
+```
+
 ### Consent API
 
 Once initialized, access the API via `window.zaraz.consent`:
@@ -172,26 +258,38 @@ import {
   rejectAllConsent,
   waitForConsentAPI,
   onConsentChange,
+  // Enhanced utilities
+  ConsentTools,
+  FakeZarazTools,
 } from 'fake-cloudflare-zaraz-consent';
 
-// Get the Zaraz instance
+// Basic utilities
 const zaraz = getZaraz();
-
-// Check availability
 if (isZarazEnabled() && isZarazConsentAPIReady()) {
   // Zaraz is ready to use
 }
 
-// Wait for API to be ready
 await waitForConsentAPI(5000); // timeout in ms
 
-// Listen for consent changes
 const unsubscribe = onConsentChange((consent) => {
   console.log('Consent updated:', consent);
 });
 
-// Clean up listener
-unsubscribe();
+// Enhanced utilities with zaraz-ts
+await ConsentTools.loadScriptIfConsent('analytics', 'script.js');
+await ConsentTools.ifConsentGranted('marketing', () => {
+  // Marketing code
+});
+
+const hasBeenSet = await ConsentTools.hasConsentBeenSet();
+const purposeInfo = await ConsentTools.getPurposeInfo('analytics');
+
+// Fake-specific utilities
+if (FakeZarazTools.isFakeZaraz()) {
+  const config = FakeZarazTools.getFakeConfig();
+  FakeZarazTools.clearFakeStorage();
+  FakeZarazTools.queueFakeEvent({ event: 'test' });
+}
 ```
 
 ## 🔧 Configuration
@@ -249,6 +347,7 @@ import { useEffect, useState } from 'react';
 import {
   onConsentChange,
   isZarazConsentAPIReady,
+  ConsentTools,
 } from 'fake-cloudflare-zaraz-consent';
 
 export const useConsent = () => {
@@ -269,9 +368,33 @@ export const useConsent = () => {
   return { consent, isReady };
 };
 
+// Enhanced hook with zaraz-ts
+export const useEnhancedConsent = () => {
+  const { consent, isReady } = useConsent();
+  const [hasBeenSet, setHasBeenSet] = useState(false);
+
+  useEffect(() => {
+    if (isReady) {
+      ConsentTools.hasConsentBeenSet().then(setHasBeenSet);
+    }
+  }, [isReady]);
+
+  const loadScriptIfConsent = async (purposeId: string, scriptSrc: string) => {
+    return ConsentTools.loadScriptIfConsent(purposeId, scriptSrc);
+  };
+
+  return { consent, isReady, hasBeenSet, loadScriptIfConsent };
+};
+
 // Component usage
 const AnalyticsComponent = () => {
-  const { consent, isReady } = useConsent();
+  const { consent, isReady, loadScriptIfConsent } = useEnhancedConsent();
+
+  useEffect(() => {
+    if (isReady && consent.analytics) {
+      loadScriptIfConsent('analytics', 'https://analytics.js');
+    }
+  }, [consent.analytics, isReady]);
 
   if (!isReady || !consent.analytics) {
     return <div>Analytics disabled</div>;
@@ -288,6 +411,7 @@ const AnalyticsComponent = () => {
 import {
   initializeZarazConsentTools,
   cleanupZarazConsentTools,
+  FakeZarazTools,
 } from 'fake-cloudflare-zaraz-consent';
 
 beforeEach(() => {
@@ -303,6 +427,25 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanupZarazConsentTools();
+
+  // Clear fake storage if using fake implementation
+  if (FakeZarazTools.isFakeZaraz()) {
+    FakeZarazTools.clearFakeStorage();
+  }
+});
+
+// Enhanced testing utilities
+describe('Consent functionality', () => {
+  it('should handle conditional script loading', async () => {
+    const { ConsentTools } = await import('fake-cloudflare-zaraz-consent');
+
+    let scriptLoaded = false;
+    await ConsentTools.ifConsentGranted('analytics', () => {
+      scriptLoaded = true;
+    });
+
+    expect(scriptLoaded).toBe(false); // analytics disabled by default
+  });
 });
 ```
 
@@ -313,8 +456,11 @@ afterEach(() => {
 ```typescript
 // Only load in development
 if (process.env.NODE_ENV === 'development') {
-  import('fake-cloudflare-zaraz-consent').then(({ quickSetup }) => {
-    quickSetup({ autoShow: true });
+  import('fake-cloudflare-zaraz-consent').then(({ quickSetupWithTools }) => {
+    quickSetupWithTools({
+      autoShow: true,
+      enableGlobalTools: true, // Enables browser console debugging
+    });
   });
 }
 ```
@@ -323,8 +469,22 @@ if (process.env.NODE_ENV === 'development') {
 
 ```typescript
 // Check if running fake vs real Zaraz
-const isRealZaraz =
-  window.zaraz && !window.zaraz.constructor.name.includes('Fake');
+import { FakeZarazTools } from 'fake-cloudflare-zaraz-consent';
+
+const isRealZaraz = !FakeZarazTools.isFakeZaraz();
+```
+
+### Browser Console Debugging
+
+When `enableGlobalTools` is enabled, you get access to convenient debugging tools:
+
+```javascript
+// Available in browser console
+window.zarazConsentTools.debug(); // Debug current state
+window.zarazConsentTools.acceptAll(); // Accept all consent
+window.zarazConsentTools.rejectAll(); // Reject all consent
+window.zarazConsentTools.getAll(); // Get all consent status
+window.zarazConsentTools.showModal(); // Show consent modal
 ```
 
 ## 📦 What's Included
@@ -335,6 +495,9 @@ const isRealZaraz =
 - **Events**: Standard Zaraz events (`zarazConsentAPIReady`, `zarazConsentChoicesUpdated`)
 - **TypeScript**: Complete type definitions
 - **Utilities**: Helper functions for common operations
+- **🚀 Enhanced Integration**: Seamless integration with [zaraz-ts](https://www.npmjs.com/package/zaraz-ts)
+- **🛠️ Development Tools**: Advanced debugging and console utilities
+- **📦 Conditional Loading**: Smart script loading based on consent status
 
 ## 🤝 Contributing
 

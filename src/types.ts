@@ -1,3 +1,16 @@
+// Re-export and extend types from zaraz-ts
+import type { zaraz } from 'zaraz-ts';
+
+// Re-export the zaraz type
+export type { zaraz } from 'zaraz-ts';
+
+// Use the same type signature as zaraz-ts for consent preferences
+export type ConsentPreferences = { [key: string]: boolean };
+
+// Extract the base consent type from zaraz-ts
+type BaseZarazConsent = typeof zaraz.consent;
+
+// Custom types specific to our fake implementation
 export interface Purpose {
   id: string;
   name: string;
@@ -6,25 +19,15 @@ export interface Purpose {
   required?: boolean;
 }
 
-export interface ConsentPreferences {
-  [purposeId: string]: boolean;
-}
-
-export interface ZarazConsentAPI {
+// Extend the base zaraz consent API with our additional functionality
+export interface ZarazConsentAPI extends BaseZarazConsent {
   APIReady: boolean;
   modal: boolean;
   purposes: { [purposeId: string]: Purpose };
-  get(purposeId: string): boolean | undefined;
-  set(consentPreferences: ConsentPreferences): void;
-  getAll(): ConsentPreferences;
-  setAll(consentStatus: boolean): void;
-  getAllCheckboxes(): ConsentPreferences;
-  setCheckboxes(checkboxesStatus: ConsentPreferences): void;
-  setAllCheckboxes(checkboxStatus: boolean): void;
-  sendQueuedEvents(): void;
 }
 
-export interface ZarazGlobal {
+// Extend the base zaraz type with our consent API
+export interface ZarazGlobal extends Omit<typeof zaraz, 'consent'> {
   consent: ZarazConsentAPI;
   showConsentModal?: () => void;
 }

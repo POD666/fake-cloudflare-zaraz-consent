@@ -1,58 +1,57 @@
 // Demo integration file showing how to use fake-cloudflare-zaraz-consent in your project
+// Now with zaraz-ts integration for enhanced functionality
 
 // In a real project, you would import from the npm package:
-// import { initializeZarazConsentTools, quickSetup } from 'fake-cloudflare-zaraz-consent';
+// import {
+//   initializeZarazConsentTools,
+//   quickSetup,
+//   initializeWithTools,
+//   quickSetupWithTools,
+//   ConsentTools,
+//   FakeZarazTools
+// } from 'fake-cloudflare-zaraz-consent';
 
 // For this demo, we import from the local build
 import {
   initializeZarazConsentTools,
   quickSetup,
+  // Shared demo utilities
+  DEMO_PURPOSES,
+} from './dist/index.js';
+
+// Demo-specific default consent (GDPR compliant)
+const DEMO_DEFAULT_CONSENT = {
+  functional: true,
+  analytics: false,
+  marketing: false,
+  preferences: false,
+};
+
+// Import zaraz-ts functions directly
+import {
   showConsentModal,
   acceptAllConsent,
   rejectAllConsent,
   waitForConsentAPI,
-  onConsentChange
-} from './dist/index.js';/**
+  onConsentChange,
+  getAllConsent,
+  hasConsentBeenSet,
+  loadScriptIfConsent,
+  ifConsentGranted,
+  debugConsentState,
+  createGlobalConsentTools,
+} from 'zaraz-ts';
+
+/**
  * Example 1: Basic setup with custom configuration
  */
 export const basicSetup = () => {
   return initializeZarazConsentTools({
-    // Custom purposes that match your production Zaraz setup
-    purposes: [
-      {
-        id: 'functional',
-        name: 'Essential Cookies',
-        description: 'Necessary for the website to function properly. These cannot be disabled.',
-        order: 1,
-        required: true,
-      },
-      {
-        id: 'analytics',
-        name: 'Analytics & Performance',
-        description: 'Help us understand how visitors interact with our website by collecting usage data.',
-        order: 2,
-      },
-      {
-        id: 'marketing',
-        name: 'Marketing & Advertising',
-        description: 'Used to deliver personalized advertisements and measure their effectiveness.',
-        order: 3,
-      },
-      {
-        id: 'preferences',
-        name: 'Preferences & Personalization',
-        description: 'Remember your settings and preferences to enhance your experience.',
-        order: 4,
-      },
-    ],
+    // Use shared demo purposes for consistency
+    purposes: DEMO_PURPOSES,
 
-    // Default consent - functional always true, others false for GDPR compliance
-    defaultConsent: {
-      functional: true,
-      analytics: false,
-      marketing: false,
-      preferences: false,
-    },
+    // Use shared default consent (GDPR compliant)
+    defaultConsent: DEMO_DEFAULT_CONSENT,
 
     // Enable detailed logging in development
     enableLogging: true,
@@ -75,7 +74,7 @@ export const basicSetup = () => {
     // Use the same cookie name as production
     cookieName: 'demo_consent',
 
-    // Don't auto-show modal - let the app control when to show it
+    // Auto-show modal on first visit
     autoShow: true,
   });
 };
@@ -91,7 +90,34 @@ export const quickDevelopmentSetup = () => {
 };
 
 /**
- * Example 3: Environment-specific initialization
+ * Example 3: Enhanced setup with zaraz-ts
+ */
+export const enhancedSetup = async () => {
+  console.log('🚀 Setting up with enhanced tools...');
+
+  // Initialize fake Zaraz
+  const zaraz = quickSetup({
+    autoShow: true,
+    enableLogging: true,
+  });
+
+  // Wait for API to be ready
+  await waitForConsentAPI();
+
+  // Enable global console tools for debugging
+  await createGlobalConsentTools();
+
+  console.log('✅ Enhanced setup complete!');
+  console.log('💡 Try these in browser console:');
+  console.log('   - window.zarazConsentTools.debug()');
+  console.log('   - window.zarazConsentTools.acceptAll()');
+  console.log('   - window.zarazConsentTools.getAll()');
+
+  return zaraz;
+};
+
+/**
+ * Example 4: Environment-specific initialization
  */
 export const initializeForEnvironment = () => {
   // Only initialize in browser environment
@@ -110,9 +136,10 @@ export const initializeForEnvironment = () => {
 };
 
 /**
- * Utility functions for your app
+ * Enhanced utility functions with zaraz-ts integration
  */
-export const consentUtils = {
+export const enhancedConsentUtils = {
+  // Original utilities
   showModal: () => {
     showConsentModal();
   },
@@ -139,6 +166,87 @@ export const consentUtils = {
     rejectAllConsent();
   },
 
+  // Enhanced utilities with zaraz-ts
+  async loadAnalyticsIfConsented() {
+    try {
+      await ifConsentGranted('analytics', () => {
+        console.log('🔍 Loading analytics script...');
+        // Simulate loading analytics
+        window.gtag?.('config', 'GA_MEASUREMENT_ID');
+      }, () => {
+        console.log('🚫 Analytics consent not granted');
+      });
+    } catch (error) {
+      console.warn('Analytics loading failed:', error);
+    }
+  },
+
+  async loadMarketingScriptsIfConsented() {
+    try {
+      await loadScriptIfConsent(
+        'marketing',
+        'https://example.com/marketing-script.js'
+      );
+      console.log('📈 Marketing scripts loaded');
+    } catch (error) {
+      console.warn('Marketing script loading failed:', error);
+    }
+  },
+
+  async checkConsentStatus() {
+    const hasBeenSet = await hasConsentBeenSet();
+    if (!hasBeenSet) {
+      console.log('⚠️ User has not set consent preferences yet');
+      return null;
+    }
+
+    const consent = await getAllConsent();
+    console.log('✅ Current consent:', consent);
+    return consent;
+  },
+
+  async debugConsent() {
+    await debugConsentState();
+  },
+
+  // Fake Zaraz specific utilities
+  checkIfFakeImplementation() {
+    const zaraz = window.zaraz;
+    const isFake = zaraz && zaraz.constructor.name.includes('Fake');
+    console.log(`🎭 Using ${isFake ? 'FAKE' : 'REAL'} Zaraz implementation`);
+    return isFake;
+  },
+
+  getFakeConfig() {
+    const zaraz = window.zaraz;
+    if (zaraz && zaraz.getConfig) {
+      const config = zaraz.getConfig();
+      console.log('⚙️ Fake Zaraz config:', config);
+      return config;
+    }
+    return null;
+  },
+
+  clearFakeStorage() {
+    const zaraz = window.zaraz;
+    if (zaraz && zaraz.clearStorage) {
+      zaraz.clearStorage();
+      console.log('🗑️ Fake storage cleared');
+    }
+  },
+
+  simulateEvent(eventName, eventData = {}) {
+    const zaraz = window.zaraz;
+    if (zaraz && zaraz.queueEvent) {
+      zaraz.queueEvent({
+        event: eventName,
+        data: eventData,
+        timestamp: Date.now()
+      });
+      console.log(`📥 Queued fake event: ${eventName}`, eventData);
+    }
+  },
+
   // Wait for consent API to be ready before using it
   waitForReady: async (timeout = 10000) => {
     try {
@@ -158,66 +266,127 @@ export const consentUtils = {
 };
 
 /**
- * Example usage patterns
+ * Enhanced example usage patterns with zaraz-ts
  */
-export const usageExamples = {
-  // Example: React-like usage
+export const enhancedUsageExamples = {
+  // Example: React-like usage with enhanced tools
   async componentDidMount() {
     // Wait for consent API
-    const isReady = await consentUtils.waitForReady();
+    const isReady = await enhancedConsentUtils.waitForReady();
 
     if (isReady) {
+      // Check if we're using fake implementation
+      enhancedConsentUtils.checkIfFakeImplementation();
+
       // Check if analytics is enabled
-      if (consentUtils.isConsentGranted('analytics')) {
-        // Initialize analytics
+      if (enhancedConsentUtils.isConsentGranted('analytics')) {
         console.log('🔍 Analytics enabled - initializing tracking');
+        await enhancedConsentUtils.loadAnalyticsIfConsented();
       }
 
       // Listen for consent changes
-      const unsubscribe = consentUtils.onConsentChange((consent) => {
+      const unsubscribe = enhancedConsentUtils.onConsentChange((consent) => {
         console.log('🔄 Consent updated:', consent);
 
         if (consent.analytics) {
           console.log('🔍 Analytics enabled');
+          enhancedConsentUtils.loadAnalyticsIfConsented();
         } else {
           console.log('🚫 Analytics disabled');
         }
+
+        if (consent.marketing) {
+          console.log('📈 Marketing enabled');
+          enhancedConsentUtils.loadMarketingScriptsIfConsented();
+        }
       });
 
-      // Clean up on unmount
       return unsubscribe;
     }
   },
 
-  // Example: Check consent before loading scripts
-  loadConditionalScripts() {
-    if (consentUtils.isConsentGranted('marketing')) {
-      // Load marketing scripts
-      console.log('📈 Loading marketing scripts');
+  // Example: Advanced consent checking
+  async checkAdvancedConsent() {
+    const status = await enhancedConsentUtils.checkConsentStatus();
+
+    if (!status) {
+      console.log('⚠️ No consent set, showing modal...');
+      enhancedConsentUtils.showModal();
+      return;
     }
 
-    if (consentUtils.isConsentGranted('analytics')) {
-      // Load analytics scripts
-      console.log('📊 Loading analytics scripts');
+    // Load scripts based on consent
+    if (status.analytics) {
+      await enhancedConsentUtils.loadAnalyticsIfConsented();
+    }
+
+    if (status.marketing) {
+      await enhancedConsentUtils.loadMarketingScriptsIfConsented();
     }
   },
 
-  // Example: Show consent banner
-  showConsentBannerIfNeeded() {
-    const consent = consentUtils.getConsentStatus();
+  // Example: Development debugging
+  async debuggingExample() {
+    console.log('🔍 Running debugging example...');
 
-    // If no consent data exists, show the modal
-    if (!consent) {
-      consentUtils.showModal();
+    // Check if fake implementation
+    const isFake = enhancedConsentUtils.checkIfFakeImplementation();
+
+    if (isFake) {
+      // Get fake config
+      enhancedConsentUtils.getFakeConfig();
+
+      // Simulate some events
+      enhancedConsentUtils.simulateEvent('page_view', { page: '/demo' });
+      enhancedConsentUtils.simulateEvent('user_engagement', { engagement_time: 5000 });
+
+      // Debug current state
+      await enhancedConsentUtils.debugConsent();
     }
+  },
+
+  // Example: Conditional script loading
+  async conditionalScriptExample() {
+    console.log('📦 Loading scripts based on consent...');
+
+    // Load Google Analytics if analytics consent is granted
+    await ifConsentGranted('analytics', () => {
+      console.log('🔍 Loading Google Analytics...');
+      // In real app: loadScript('https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID');
+    });
+
+    // Load marketing pixels if marketing consent is granted
+    await ifConsentGranted('marketing', () => {
+      console.log('📈 Loading marketing pixels...');
+      // In real app: loadScript('https://connect.facebook.net/en_US/fbevents.js');
+    });
   }
 };
 
 // Auto-initialize for demo purposes
 // In a real app, you'd call this from your main application file
 console.log('🎬 Demo: Initializing Zaraz Consent Tools...');
-initializeForEnvironment();
 
-// Export for global access in demo
-window.demoConsentUtils = consentUtils;
-window.demoUsageExamples = usageExamples;
+// Use the enhanced setup
+enhancedSetup().then((zaraz) => {
+  console.log('✅ Enhanced demo setup complete!');
+
+  // Export for global access in demo
+  window.demoConsentUtils = enhancedConsentUtils;
+  window.demoUsageExamples = enhancedUsageExamples;
+  window.fakeZarazInstance = zaraz;
+
+  // Run some demo examples
+  setTimeout(async () => {
+    console.log('🎯 Running demo examples...');
+    await enhancedUsageExamples.checkAdvancedConsent();
+    await enhancedUsageExamples.debuggingExample();
+  }, 2000);
+}).catch(error => {
+  console.error('❌ Enhanced setup failed, falling back to basic setup:', error);
+
+  // Fallback to basic setup
+  const zaraz = initializeForEnvironment();
+  window.demoConsentUtils = enhancedConsentUtils;
+  window.fakeZarazInstance = zaraz;
+});

@@ -9,6 +9,12 @@ import {
 import { DEFAULT_CONFIG } from './config.js';
 import { ConsentStorage } from './storage.js';
 import { ConsentModal } from './modal.js';
+import {
+  createLogger,
+  validatePurposeIds,
+  dispatchCustomEvent,
+  delay,
+} from './utils.js';
 
 export class FakeZaraz implements ZarazGlobal {
   public consent: ZarazConsentAPI;
@@ -18,10 +24,12 @@ export class FakeZaraz implements ZarazGlobal {
   private queuedEvents: any[] = [];
   private modalVisible: boolean = false;
   private currentConsent: ConsentPreferences;
+  private logger: ReturnType<typeof createLogger>;
 
   constructor(config: Partial<ZarazConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.storage = new ConsentStorage(this.config.cookieName);
+    this.logger = createLogger('Fake Zaraz', this.config.enableLogging);
 
     // Load existing consent or use defaults
     const savedConsent = this.storage.load();
@@ -30,7 +38,7 @@ export class FakeZaraz implements ZarazGlobal {
 
     this.consent = this.createConsentAPI();
 
-    this.log('Fake Zaraz initialized', {
+    this.logger.log('Initialized', {
       purposes: this.config.purposes.map((p) => p.id),
       initialConsent,
       fromStorage: !!savedConsent,
@@ -38,25 +46,25 @@ export class FakeZaraz implements ZarazGlobal {
 
     // Set up auto-show if enabled
     if (this.config.autoShow && !savedConsent) {
-      setTimeout(() => this.showConsentModal(), 100);
+      delay(100).then(() => this.showConsentModal());
     }
 
     // Dispatch ready event
-    setTimeout(() => {
+    delay(50).then(() => {
       this.consent.APIReady = true;
-      this.dispatchEvent('zarazConsentAPIReady', {});
-      this.log('Consent API is ready');
-    }, 50);
+      dispatchCustomEvent('zarazConsentAPIReady', {}, this.logger);
+      this.logger.log('Consent API is ready');
+    });
   }
 
   showConsentModal = (): void => {
     if (!this.config.enableModal) {
-      this.log('Consent modal is disabled');
+      this.logger.log('Consent modal is disabled');
       return;
     }
 
     if (this.modal) {
-      this.log('Consent modal is already shown');
+      this.logger.log('Consent modal is already shown');
       return;
     }
 
@@ -78,7 +86,7 @@ export class FakeZaraz implements ZarazGlobal {
 
     this.modalVisible = true;
     this.modal.show();
-    this.log('Consent modal shown');
+    this.logger.log('Consent modal shown');
   };
 
   private createConsentAPI(): ZarazConsentAPI {
@@ -110,28 +118,25 @@ export class FakeZaraz implements ZarazGlobal {
 
       get: (purposeId: string): boolean | undefined => {
         if (!purposes[purposeId]) {
-          self.log(`Purpose "${purposeId}" does not exist`, {
+          self.logger.warn(`Purpose "${purposeId}" does not exist`, {
             availablePurposes: Object.keys(purposes),
           });
           return undefined;
         }
         const result = self.currentConsent[purposeId] || false;
-        self.log(`Get consent for "${purposeId}": ${result}`);
+        self.logger.log(`Get consent for "${purposeId}": ${result}`);
         return result;
       },
 
       set: (consentPreferences: ConsentPreferences): void => {
-        self.log('Setting consent', consentPreferences);
+        self.logger.log('Setting consent', consentPreferences);
 
         // Validate purpose IDs
-        const invalidPurposes = Object.keys(consentPreferences).filter(
-          (id) => !purposes[id]
+        const invalidPurposes = validatePurposeIds(
+          Object.keys(consentPreferences),
+          purposes,
+          self.logger
         );
-        if (invalidPurposes.length > 0) {
-          self.log(`Invalid purpose IDs: ${invalidPurposes.join(', ')}`, {
-            availablePurposes: Object.keys(purposes),
-          });
-        }
 
         // Update consent for valid purposes
         Object.entries(consentPreferences).forEach(([purposeId, granted]) => {
@@ -145,12 +150,12 @@ export class FakeZaraz implements ZarazGlobal {
 
       getAll: (): ConsentPreferences => {
         const result = { ...self.currentConsent };
-        self.log('Get all consent', result);
+        self.logger.log('Get all consent', result);
         return result;
       },
 
       setAll: (consentStatus: boolean): void => {
-        self.log(`Setting all consent to: ${consentStatus}`);
+        self.logger.log(`Setting all consent to: ${consentStatus}`);
 
         const newConsent: ConsentPreferences = {};
         self.config.purposes.forEach((purpose) => {
@@ -165,22 +170,20 @@ export class FakeZaraz implements ZarazGlobal {
       getAllCheckboxes: (): ConsentPreferences => {
         // For local dev, checkboxes state is same as consent state
         const result = { ...self.currentConsent };
-        self.log('Get all checkboxes', result);
+        self.logger.log('Get all checkboxes', result);
         return result;
       },
 
       setCheckboxes: (checkboxesStatus: ConsentPreferences): void => {
-        self.log('Setting checkboxes', checkboxesStatus);
+        self.logger.log('Setting checkboxes', checkboxesStatus);
         // For local dev, setting checkboxes is same as setting consent
+
         // Validate purpose IDs
-        const invalidPurposes = Object.keys(checkboxesStatus).filter(
-          (id) => !purposes[id]
+        validatePurposeIds(
+          Object.keys(checkboxesStatus),
+          purposes,
+          self.logger
         );
-        if (invalidPurposes.length > 0) {
-          self.log(`Invalid purpose IDs: ${invalidPurposes.join(', ')}`, {
-            availablePurposes: Object.keys(purposes),
-          });
-        }
 
         // Update consent for valid purposes
         Object.entries(checkboxesStatus).forEach(([purposeId, granted]) => {
@@ -193,7 +196,7 @@ export class FakeZaraz implements ZarazGlobal {
       },
 
       setAllCheckboxes: (checkboxStatus: boolean): void => {
-        self.log(`Setting all checkboxes to: ${checkboxStatus}`);
+        self.logger.log(`Setting all checkboxes to: ${checkboxStatus}`);
         // For local dev, setting all checkboxes is same as setting all consent
         const newConsent: ConsentPreferences = {};
         self.config.purposes.forEach((purpose) => {
@@ -206,16 +209,16 @@ export class FakeZaraz implements ZarazGlobal {
       },
 
       sendQueuedEvents: (): void => {
-        self.log(`Sending ${self.queuedEvents.length} queued events`);
+        self.logger.log(`Sending ${self.queuedEvents.length} queued events`);
 
         if (self.queuedEvents.length > 0) {
           // Simulate sending events
           self.queuedEvents.forEach((event, index) => {
-            self.log(`Sending queued event ${index + 1}`, event);
+            self.logger.log(`Sending queued event ${index + 1}`, event);
           });
 
           self.queuedEvents = [];
-          self.log('All queued events sent');
+          self.logger.log('All queued events sent');
         }
       },
     };
@@ -233,31 +236,16 @@ export class FakeZaraz implements ZarazGlobal {
     this.storage.save(newConsent);
 
     // Dispatch event
-    this.dispatchEvent('zarazConsentChoicesUpdated', { consent: newConsent });
+    dispatchCustomEvent(
+      'zarazConsentChoicesUpdated',
+      { consent: newConsent },
+      this.logger
+    );
 
-    this.log('Consent updated', newConsent);
+    this.logger.log('Consent updated', newConsent);
   }
 
-  private dispatchEvent(eventName: string, detail: any): void {
-    try {
-      const event = new CustomEvent(eventName, { detail });
-      document.dispatchEvent(event);
-      this.log(`Event dispatched: ${eventName}`, detail);
-    } catch (error) {
-      this.log(`Failed to dispatch event: ${eventName}`, error);
-    }
-  }
-
-  private log(message: string, data?: any): void {
-    if (!this.config.enableLogging) return;
-
-    const prefix = '[Zaraz Consent Tools]';
-    if (data !== undefined) {
-      console.log(`${prefix} ${message}`, data);
-    } else {
-      console.log(`${prefix} ${message}`);
-    }
-  }
+  // Remove the dispatchEvent method since we're using the shared utility
 
   // Utility methods for testing
   public getConfig(): Required<ZarazConfig> {
@@ -266,11 +254,11 @@ export class FakeZaraz implements ZarazGlobal {
 
   public clearStorage(): void {
     this.storage.clear();
-    this.log('Storage cleared');
+    this.logger.log('Storage cleared');
   }
 
   public queueEvent(event: any): void {
     this.queuedEvents.push(event);
-    this.log('Event queued', event);
+    this.logger.log('Event queued', event);
   }
 }

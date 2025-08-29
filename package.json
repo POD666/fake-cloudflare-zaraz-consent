@@ -1,6 +1,6 @@
 {
   "name": "fake-cloudflare-zaraz-consent",
-  "version": "1.0.2",
+  "version": "1.1.2",
   "description": "Local development tool for Cloudflare Zaraz consent management with fake instance and consent dialog",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -19,7 +19,7 @@
     "clean": "rm -rf dist",
     "demo": "npx serve demo -l 3000",
     "demo:dev": "npm run build && cp -r dist demo/ && npm run dev & npm run demo",
-    "demo:build": "npm run build && cp -r dist demo/",
+    "demo:build": "npm run build && node scripts/build-demo.js",
     "prepublishOnly": "npm run clean && npm run build",
     "test": "echo \"No tests yet\" && exit 0",
     "release": "np",
@@ -47,7 +47,10 @@
     "fake",
     "development-tools",
     "cookie-consent",
-    "typescript"
+    "typescript",
+    "zaraz-ts",
+    "consent-management",
+    "conditional-loading"
   ],
   "author": {
     "name": "Viktor Danyliuk",
@@ -61,6 +64,9 @@
     "@types/node": "^20.0.0",
     "np": "^10.2.0",
     "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "zaraz-ts": "^1.2.0"
   },
   "files": [
     "dist/",

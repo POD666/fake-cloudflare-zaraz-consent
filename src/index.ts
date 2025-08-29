@@ -5,11 +5,16 @@ export * from './modal.js';
 export * from './fake-zaraz.js';
 export * from './utils.js';
 
+// Re-export zaraz-ts functions for Node.js environments
+export * from 'zaraz-ts';
+
+// Import the getZaraz helper from zaraz-ts
+import { getZaraz } from 'zaraz-ts/build/helpers/get-zaraz.js';
 import { FakeZaraz } from './fake-zaraz.js';
 import { ZarazConfig } from './types.js';
+import { isBrowserEnvironment, createLogger, ERROR_MESSAGES } from './utils.js';
 
-// Global instance
-let globalZarazInstance: FakeZaraz | null = null;
+const logger = createLogger('Zaraz Consent Tools', true);
 
 /**
  * Initialize Zaraz Consent Tools with the given configuration
@@ -20,26 +25,19 @@ let globalZarazInstance: FakeZaraz | null = null;
 export function initializeZarazConsentTools(
   config: Partial<ZarazConfig> = {}
 ): FakeZaraz {
-  if (typeof window === 'undefined') {
-    throw new Error(
-      'Zaraz Consent Tools can only be used in a browser environment'
-    );
-  }
-
-  // Clean up existing instance
-  if (globalZarazInstance) {
-    console.warn('[Zaraz Consent Tools] Replacing existing instance');
+  if (!isBrowserEnvironment()) {
+    throw new Error(ERROR_MESSAGES.NOT_BROWSER);
   }
 
   // Create new instance
-  globalZarazInstance = new FakeZaraz(config);
+  const newInstance = new FakeZaraz(config);
 
   // Attach to window
-  (window as any).zaraz = globalZarazInstance;
+  (window as any).zaraz = newInstance;
 
-  console.log('[Zaraz Consent Tools] Initialized and attached to window.zaraz');
+  logger.log('Initialized and attached to window.zaraz');
 
-  return globalZarazInstance;
+  return newInstance;
 }
 
 /**
@@ -47,23 +45,23 @@ export function initializeZarazConsentTools(
  * @returns The current FakeZaraz instance or null if not initialized
  */
 export function getZarazConsentTools(): FakeZaraz | null {
-  return globalZarazInstance;
+  return getZaraz();
 }
 
 /**
  * Clean up the global Zaraz instance
  */
 export function cleanupZarazConsentTools(): void {
-  if (globalZarazInstance) {
-    globalZarazInstance.clearStorage();
-    globalZarazInstance = null;
+  const zaraz = (window as any).zaraz;
+  if (zaraz && zaraz.clearStorage) {
+    zaraz.clearStorage();
   }
 
-  if (typeof window !== 'undefined') {
+  if (isBrowserEnvironment()) {
     delete (window as any).zaraz;
   }
 
-  console.log('[Zaraz Consent Tools] Cleaned up');
+  logger.log('Cleaned up');
 }
 
 /**

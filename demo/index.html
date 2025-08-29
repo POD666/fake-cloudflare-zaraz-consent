@@ -297,14 +297,7 @@ document.addEventListener('zarazConsentChoicesUpdated', () => {
     <script type="module">
         // Import the actual built zaraz consent tools
         import {
-            initializeZarazConsentTools,
-            showConsentModal,
-            hideConsentModal,
-            acceptAllConsent,
-            rejectAllConsent,
-            sendQueuedEvents,
-            onConsentChange,
-            getZaraz
+            initializeZarazConsentTools
         } from './dist/index.js';        // Initialize the real Zaraz consent tools
         const zaraz = initializeZarazConsentTools({
             purposes: [
@@ -387,8 +380,8 @@ document.addEventListener('zarazConsentChoicesUpdated', () => {
         // Start checking
         checkReady();
 
-        // Listen for consent changes
-        const unsubscribe = onConsentChange((consent) => {
+        // Listen for consent changes via events
+        document.addEventListener('zarazConsentChoicesUpdated', () => {
             updateDisplay();
         });
 
@@ -406,19 +399,27 @@ document.addEventListener('zarazConsentChoicesUpdated', () => {
 
         // Global functions for buttons
         window.showModal = () => {
-            showConsentModal();
+            if (window.zaraz?.consent) {
+                window.zaraz.consent.modal = true;
+            }
         };
 
         window.hideModal = () => {
-            hideConsentModal();
+            if (window.zaraz?.consent) {
+                window.zaraz.consent.modal = false;
+            }
         };
 
         window.acceptAll = () => {
-            acceptAllConsent();
+            if (window.zaraz?.consent) {
+                window.zaraz.consent.setAll(true);
+            }
         };
 
         window.rejectAll = () => {
-            rejectAllConsent();
+            if (window.zaraz?.consent) {
+                window.zaraz.consent.setAll(false);
+            }
         };
 
         window.resetConsent = () => {
@@ -433,7 +434,9 @@ document.addEventListener('zarazConsentChoicesUpdated', () => {
         };
 
         window.sendQueuedEvents = () => {
-            sendQueuedEvents();
+            if (window.zaraz?.consent?.sendQueuedEvents) {
+                window.zaraz.consent.sendQueuedEvents();
+            }
         };
 
         window.clearStorage = () => {

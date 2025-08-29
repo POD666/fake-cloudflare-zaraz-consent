@@ -1,198 +1,173 @@
-import { ZarazGlobal } from './types.js';
+/**
+ * Shared utility functions to avoid code duplication (DRY principle)
+ */
 
 /**
- * Get the Zaraz global instance from the window object
- * @returns The Zaraz global instance or undefined if not available
+ * Centralized logging function with consistent formatting
  */
-export const getZaraz = (): ZarazGlobal | undefined => {
-  return typeof window !== 'undefined' ? (window as any).zaraz : undefined;
-};
+export function createLogger(prefix: string, enabled: boolean = true) {
+  return {
+    log: (message: string, data?: any) => {
+      if (!enabled) return;
+
+      const fullPrefix = `[${prefix}]`;
+      if (data !== undefined) {
+        console.log(`${fullPrefix} ${message}`, data);
+      } else {
+        console.log(`${fullPrefix} ${message}`);
+      }
+    },
+
+    warn: (message: string, data?: any) => {
+      if (!enabled) return;
+
+      const fullPrefix = `[${prefix}]`;
+      if (data !== undefined) {
+        console.warn(`${fullPrefix} ${message}`, data);
+      } else {
+        console.warn(`${fullPrefix} ${message}`);
+      }
+    },
+
+    error: (message: string, data?: any) => {
+      if (!enabled) return;
+
+      const fullPrefix = `[${prefix}]`;
+      if (data !== undefined) {
+        console.error(`${fullPrefix} ${message}`, data);
+      } else {
+        console.error(`${fullPrefix} ${message}`);
+      }
+    },
+  };
+}
 
 /**
- * Check if Zaraz is available and initialized
- * @returns True if Zaraz is available
+ * Browser environment check
  */
-export const isZarazEnabled = (): boolean => {
-  return !!getZaraz();
-};
+export function isBrowserEnvironment(): boolean {
+  return typeof window !== 'undefined';
+}
 
 /**
- * Check if Zaraz Consent API is ready
- * @returns True if the consent API is ready
+ * Standard error messages
  */
-export const isZarazConsentAPIReady = (): boolean => {
-  return !!getZaraz()?.consent?.APIReady;
-};
+export const ERROR_MESSAGES = {
+  NOT_BROWSER: 'This function can only be used in a browser environment',
+  API_NOT_READY: 'Zaraz Consent API is not ready',
+  INVALID_PURPOSE: 'Invalid purpose ID provided',
+  METHOD_NOT_AVAILABLE: 'Method not available in current Zaraz instance',
+} as const;
 
 /**
- * Get consent status for a specific purpose by ID
- * @param purposeId The purpose ID to check
- * @returns True if consent is granted, false if denied, undefined if purpose doesn't exist
+ * Validate purpose IDs against available purposes
  */
-export const getConsentForPurpose = (
-  purposeId: string
-): boolean | undefined => {
-  return getZaraz()?.consent?.get(purposeId);
-};
+export function validatePurposeIds(
+  purposeIds: string[],
+  availablePurposes: Record<string, any>,
+  logger?: ReturnType<typeof createLogger>
+): string[] {
+  const invalid = purposeIds.filter((id) => !availablePurposes[id]);
+
+  if (invalid.length > 0 && logger) {
+    logger.warn(`Invalid purpose IDs: ${invalid.join(', ')}`, {
+      invalidPurposes: invalid,
+      availablePurposes: Object.keys(availablePurposes),
+    });
+  }
+
+  return invalid;
+}
 
 /**
- * Set consent for a specific purpose by ID
- * @param purposeId The purpose ID to set
- * @param granted Whether consent is granted
+ * Dispatch custom event safely
  */
-export const setConsentForPurpose = (
-  purposeId: string,
-  granted: boolean
-): void => {
-  const zaraz = getZaraz();
-  if (!zaraz?.consent?.set) {
-    console.warn(
-      '[Zaraz Consent Tools] Zaraz consent API not available for setConsentForPurpose'
-    );
+export function dispatchCustomEvent(
+  eventName: string,
+  detail: any,
+  logger?: ReturnType<typeof createLogger>
+): void {
+  if (!isBrowserEnvironment()) {
+    logger?.warn('Cannot dispatch event: not in browser environment');
     return;
   }
 
-  zaraz.consent.set({ [purposeId]: granted });
-};
-
-/**
- * Get all available purposes from Zaraz
- * @returns Object containing all configured purposes
- */
-export const getAllPurposes = () => {
-  return getZaraz()?.consent?.purposes || {};
-};
-
-/**
- * Show the consent modal
- */
-export const showConsentModal = (): void => {
-  const zaraz = getZaraz();
-  if (zaraz?.consent) {
-    zaraz.consent.modal = true;
-  } else if (zaraz?.showConsentModal) {
-    zaraz.showConsentModal();
-  } else {
-    console.warn(
-      '[Zaraz Consent Tools] No method available to show consent modal'
-    );
+  try {
+    const event = new CustomEvent(eventName, { detail });
+    document.dispatchEvent(event);
+    logger?.log(`Event dispatched: ${eventName}`, detail);
+  } catch (error) {
+    logger?.error(`Failed to dispatch event: ${eventName}`, error);
   }
-};
+}
 
 /**
- * Hide the consent modal
+ * Common default purposes for demos and testing
  */
-export const hideConsentModal = (): void => {
-  const zaraz = getZaraz();
-  if (zaraz?.consent) {
-    zaraz.consent.modal = false;
-  } else {
-    console.warn(
-      '[Zaraz Consent Tools] No method available to hide consent modal'
-    );
-  }
-};
+export const DEMO_PURPOSES = [
+  {
+    id: 'functional',
+    name: 'Essential Cookies',
+    description:
+      'Necessary for the website to function properly. These cannot be disabled.',
+    order: 1,
+    required: true,
+  },
+  {
+    id: 'analytics',
+    name: 'Analytics & Performance',
+    description:
+      'Help us understand how visitors interact with our website by collecting usage data.',
+    order: 2,
+  },
+  {
+    id: 'marketing',
+    name: 'Marketing & Advertising',
+    description:
+      'Used to deliver personalized advertisements and measure their effectiveness.',
+    order: 3,
+  },
+  {
+    id: 'preferences',
+    name: 'Preferences & Personalization',
+    description:
+      'Remember your settings and preferences to enhance your experience.',
+    order: 4,
+  },
+];
 
 /**
- * Accept all consent categories
+ * Async timeout utility
  */
-export const acceptAllConsent = (): void => {
-  const zaraz = getZaraz();
-  if (zaraz?.consent?.setAll) {
-    zaraz.consent.setAll(true);
-  } else {
-    console.warn('[Zaraz Consent Tools] setAll method not available');
-  }
-};
+export function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 /**
- * Reject all non-essential consent categories
+ * Retry a function with exponential backoff
  */
-export const rejectAllConsent = (): void => {
-  const zaraz = getZaraz();
-  if (zaraz?.consent?.setAll) {
-    zaraz.consent.setAll(false);
-  } else {
-    console.warn('[Zaraz Consent Tools] setAll method not available');
-  }
-};
+export async function retryWithBackoff<T>(
+  fn: () => Promise<T> | T,
+  maxAttempts: number = 3,
+  baseDelay: number = 100
+): Promise<T> {
+  let lastError: any;
 
-/**
- * Send queued events after consent is granted
- */
-export const sendQueuedEvents = (): void => {
-  const zaraz = getZaraz();
-  if (zaraz?.consent?.sendQueuedEvents) {
-    zaraz.consent.sendQueuedEvents();
-  } else {
-    console.warn('[Zaraz Consent Tools] sendQueuedEvents method not available');
-  }
-};
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
 
-/**
- * Wait for Zaraz Consent API to become ready
- * @param timeout Maximum time to wait in milliseconds (default: 10000)
- * @returns Promise that resolves when API is ready or rejects on timeout
- */
-export const waitForConsentAPI = (timeout: number = 10000): Promise<void> => {
-  return new Promise((resolve, reject) => {
-    if (isZarazConsentAPIReady()) {
-      resolve();
-      return;
-    }
-
-    const startTime = Date.now();
-
-    const checkReady = () => {
-      if (isZarazConsentAPIReady()) {
-        resolve();
-        return;
+      if (attempt === maxAttempts) {
+        throw lastError;
       }
 
-      if (Date.now() - startTime > timeout) {
-        reject(
-          new Error('Timeout waiting for Zaraz Consent API to become ready')
-        );
-        return;
-      }
-
-      setTimeout(checkReady, 100);
-    };
-
-    // Also listen for the ready event
-    const handleReady = () => {
-      document.removeEventListener('zarazConsentAPIReady', handleReady);
-      resolve();
-    };
-
-    document.addEventListener('zarazConsentAPIReady', handleReady);
-
-    // Start checking
-    setTimeout(checkReady, 100);
-  });
-};
-
-/**
- * Listen for consent changes and call a callback
- * @param callback Function to call when consent changes
- * @returns Function to remove the event listener
- */
-export const onConsentChange = (
-  callback: (consent: any) => void
-): (() => void) => {
-  const handleConsentChange = () => {
-    const zaraz = getZaraz();
-    if (zaraz?.consent?.getAll) {
-      callback(zaraz.consent.getAll());
+      // Exponential backoff: 100ms, 200ms, 400ms, etc.
+      const delayMs = baseDelay * Math.pow(2, attempt - 1);
+      await delay(delayMs);
     }
-  };
+  }
 
-  document.addEventListener('zarazConsentChoicesUpdated', handleConsentChange);
-
-  return () => {
-    document.removeEventListener(
-      'zarazConsentChoicesUpdated',
-      handleConsentChange
-    );
-  };
-};
+  throw lastError;
+}
