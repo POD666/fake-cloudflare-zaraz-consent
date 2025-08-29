@@ -16,6 +16,8 @@ export class FakeZaraz implements ZarazGlobal {
   private storage: ConsentStorage;
   private modal: ConsentModal | null = null;
   private queuedEvents: any[] = [];
+  private modalVisible: boolean = false;
+  private currentConsent: ConsentPreferences;
 
   constructor(config: Partial<ZarazConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
@@ -24,8 +26,9 @@ export class FakeZaraz implements ZarazGlobal {
     // Load existing consent or use defaults
     const savedConsent = this.storage.load();
     const initialConsent = savedConsent || this.config.defaultConsent;
+    this.currentConsent = { ...initialConsent };
 
-    this.consent = this.createConsentAPI(initialConsent);
+    this.consent = this.createConsentAPI();
 
     this.log('Fake Zaraz initialized', {
       purposes: this.config.purposes.map((p) => p.id),
@@ -65,20 +68,20 @@ export class FakeZaraz implements ZarazGlobal {
       currentConsent,
       (newConsent) => {
         this.handleConsentUpdate(newConsent);
+      },
+      () => {
+        // Called whenever modal is hidden (by any means)
         this.modal = null;
+        this.modalVisible = false;
       }
     );
 
-    this.consent.modal = true;
+    this.modalVisible = true;
     this.modal.show();
     this.log('Consent modal shown');
   };
 
-  private createConsentAPI(
-    initialConsent: ConsentPreferences
-  ): ZarazConsentAPI {
-    let currentConsent = { ...initialConsent };
-    let modalVisible = false;
+  private createConsentAPI(): ZarazConsentAPI {
     const self = this; // Store reference to this
 
     // Create purposes object
@@ -91,16 +94,15 @@ export class FakeZaraz implements ZarazGlobal {
       APIReady: false,
 
       get modal() {
-        return modalVisible;
+        return self.modalVisible;
       },
 
       set modal(value: boolean) {
-        modalVisible = value;
-        if (value) {
+        if (value && !self.modalVisible) {
           self.showConsentModal();
-        } else if (self.modal) {
+        } else if (!value && self.modalVisible && self.modal) {
           self.modal.hide();
-          self.modal = null;
+          // Note: modalVisible will be set to false by the onHide callback
         }
       },
 
@@ -113,7 +115,7 @@ export class FakeZaraz implements ZarazGlobal {
           });
           return undefined;
         }
-        const result = currentConsent[purposeId] || false;
+        const result = self.currentConsent[purposeId] || false;
         self.log(`Get consent for "${purposeId}": ${result}`);
         return result;
       },
@@ -134,15 +136,15 @@ export class FakeZaraz implements ZarazGlobal {
         // Update consent for valid purposes
         Object.entries(consentPreferences).forEach(([purposeId, granted]) => {
           if (purposes[purposeId]) {
-            currentConsent[purposeId] = granted;
+            self.currentConsent[purposeId] = granted;
           }
         });
 
-        self.handleConsentUpdate(currentConsent);
+        self.handleConsentUpdate(self.currentConsent);
       },
 
       getAll: (): ConsentPreferences => {
-        const result = { ...currentConsent };
+        const result = { ...self.currentConsent };
         self.log('Get all consent', result);
         return result;
       },
@@ -156,13 +158,13 @@ export class FakeZaraz implements ZarazGlobal {
           newConsent[purpose.id] = purpose.required || consentStatus;
         });
 
-        currentConsent = newConsent;
-        self.handleConsentUpdate(currentConsent);
+        self.currentConsent = newConsent;
+        self.handleConsentUpdate(self.currentConsent);
       },
 
       getAllCheckboxes: (): ConsentPreferences => {
         // For local dev, checkboxes state is same as consent state
-        const result = { ...currentConsent };
+        const result = { ...self.currentConsent };
         self.log('Get all checkboxes', result);
         return result;
       },
@@ -183,11 +185,11 @@ export class FakeZaraz implements ZarazGlobal {
         // Update consent for valid purposes
         Object.entries(checkboxesStatus).forEach(([purposeId, granted]) => {
           if (purposes[purposeId]) {
-            currentConsent[purposeId] = granted;
+            self.currentConsent[purposeId] = granted;
           }
         });
 
-        self.handleConsentUpdate(currentConsent);
+        self.handleConsentUpdate(self.currentConsent);
       },
 
       setAllCheckboxes: (checkboxStatus: boolean): void => {
@@ -199,8 +201,8 @@ export class FakeZaraz implements ZarazGlobal {
           newConsent[purpose.id] = purpose.required || checkboxStatus;
         });
 
-        currentConsent = newConsent;
-        self.handleConsentUpdate(currentConsent);
+        self.currentConsent = newConsent;
+        self.handleConsentUpdate(self.currentConsent);
       },
 
       sendQueuedEvents: (): void => {
@@ -220,19 +222,15 @@ export class FakeZaraz implements ZarazGlobal {
   }
 
   private getCurrentConsent(): ConsentPreferences {
-    const consent: ConsentPreferences = {};
-    this.config.purposes.forEach((purpose) => {
-      consent[purpose.id] = this.consent.get(purpose.id) || false;
-    });
-    return consent;
+    return { ...this.currentConsent };
   }
 
   private handleConsentUpdate(newConsent: ConsentPreferences): void {
+    // Update internal state
+    this.currentConsent = { ...newConsent };
+
     // Save to storage
     this.storage.save(newConsent);
-
-    // Update internal state
-    Object.assign(this.getCurrentConsent(), newConsent);
 
     // Dispatch event
     this.dispatchEvent('zarazConsentChoicesUpdated', { consent: newConsent });

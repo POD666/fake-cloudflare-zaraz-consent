@@ -4,7 +4,7 @@ name: Build and Deploy Demo
 on:
   # Runs on pushes targeting the default branch
   push:
-    branches: ["main"]
+    branches: ['main']
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -18,7 +18,7 @@ permissions:
 # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
 # However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
-  group: "pages"
+  group: 'pages'
   cancel-in-progress: false
 
 jobs:
@@ -28,28 +28,35 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Run type check
         run: npm run typecheck
-      
+
       - name: Build project
         run: npm run build
-      
+
       - name: Prepare demo for deployment
         run: npm run demo:build
-      
+
+      - name: Clean demo directory for deployment
+        run: |
+          # Remove any README files that might interfere with GitHub Pages
+          find ./demo -name "README*" -type f -delete || true
+          # Ensure index.html is the main file
+          ls -la ./demo/
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
-      
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

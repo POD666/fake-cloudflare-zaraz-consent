@@ -5,18 +5,21 @@ export class ConsentModal {
   private purposes: Purpose[];
   private currentConsent: ConsentPreferences;
   private onSave: (consent: ConsentPreferences) => void;
+  private onHide: () => void;
   private overlay: HTMLElement | null = null;
 
   constructor(
     config: Required<ModalConfig>,
     purposes: Purpose[],
     currentConsent: ConsentPreferences,
-    onSave: (consent: ConsentPreferences) => void
+    onSave: (consent: ConsentPreferences) => void,
+    onHide: () => void
   ) {
     this.config = config;
     this.purposes = purposes;
     this.currentConsent = { ...currentConsent };
     this.onSave = onSave;
+    this.onHide = onHide;
   }
 
   show(): void {
@@ -39,6 +42,7 @@ export class ConsentModal {
       document.body.removeChild(this.overlay);
       document.body.style.overflow = '';
       this.overlay = null;
+      this.onHide(); // Notify parent that modal is hidden
       console.log('[Zaraz Consent Tools] Consent modal hidden');
     }
   }
