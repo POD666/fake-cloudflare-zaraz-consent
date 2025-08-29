@@ -53,7 +53,9 @@ quickSetup({
 
 ## 🎮 Live Demo
 
-Try the interactive demo to see the package in action:
+**🌐 [Try the online demo →](https://pod666.github.io/fake-cloudflare-zaraz-consent/)**
+
+Experience the package in action with our interactive demo, or run it locally:
 
 ```bash
 # Quick demo (if package is already built)
@@ -66,7 +68,7 @@ npm run demo:dev
 npm run demo:build && npm run demo
 ```
 
-This will start a local server at `http://localhost:3000` with a comprehensive demo showing:
+The local demo will start a server at `http://localhost:3000` with a comprehensive demo showing:
 
 - ✅ **Real-time consent status** display
 - 🎛️ **Interactive controls** for testing all API methods
