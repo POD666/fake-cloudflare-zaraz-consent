@@ -1,0 +1,74 @@
+{
+  "name": "fake-cloudflare-zaraz-consent",
+  "version": "1.0.0",
+  "description": "Local development tool for Cloudflare Zaraz consent management with fake instance and consent dialog",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "demo": "npx serve demo -l 3000",
+    "demo:dev": "npm run build && cp -r dist demo/ && npm run dev & npm run demo",
+    "demo:build": "npm run build && cp -r dist demo/",
+    "prepublishOnly": "npm run clean && npm run build",
+    "test": "echo \"No tests yet\" && exit 0",
+    "release": "np",
+    "release:patch": "np patch",
+    "release:minor": "np minor",
+    "release:major": "np major",
+    "release:dry": "np --dry-run"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/POD666/fake-cloudflare-zaraz-consent.git"
+  },
+  "bugs": {
+    "url": "https://github.com/POD666/fake-cloudflare-zaraz-consent/issues"
+  },
+  "homepage": "https://github.com/POD666/fake-cloudflare-zaraz-consent#readme",
+  "keywords": [
+    "cloudflare",
+    "zaraz",
+    "consent",
+    "gdpr",
+    "privacy",
+    "local-development",
+    "mock",
+    "fake",
+    "development-tools",
+    "cookie-consent",
+    "typescript"
+  ],
+  "author": {
+    "name": "Viktor Danyliuk",
+    "email": "v.v.danyliuk@gmail.com"
+  },
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "np": "^10.2.0",
+    "typescript": "^5.0.0"
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE",
+    "demo/"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}
