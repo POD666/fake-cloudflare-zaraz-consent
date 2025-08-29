@@ -18,6 +18,12 @@ import {
 
 export class FakeZaraz implements ZarazGlobal {
   public consent: ZarazConsentAPI;
+
+  // zaraz-ts compatibility properties
+  public track: any;
+  public set: any;
+  public ecommerce: any;
+
   private config: Required<ZarazConfig>;
   private storage: ConsentStorage;
   private modal: ConsentModal | null = null;
@@ -37,6 +43,11 @@ export class FakeZaraz implements ZarazGlobal {
     this.currentConsent = { ...initialConsent };
 
     this.consent = this.createConsentAPI();
+
+    // Initialize zaraz-ts compatibility properties
+    this.track = this.createTrackAPI();
+    this.set = this.createSetAPI();
+    this.ecommerce = this.createEcommerceAPI();
 
     this.logger.log('Initialized', {
       purposes: this.config.purposes.map((p) => p.id),
@@ -221,6 +232,12 @@ export class FakeZaraz implements ZarazGlobal {
           self.logger.log('All queued events sent');
         }
       },
+
+      getPurposes: (): any => {
+        // Return purposes in the format expected by zaraz-ts
+        self.logger.log('Get purposes', purposes);
+        return purposes;
+      },
     };
   }
 
@@ -260,5 +277,38 @@ export class FakeZaraz implements ZarazGlobal {
   public queueEvent(event: any): void {
     this.queuedEvents.push(event);
     this.logger.log('Event queued', event);
+  }
+
+  // zaraz-ts compatibility API implementations
+  private createTrackAPI(): any {
+    const self = this;
+    return function track(eventName: string, eventData?: any) {
+      self.logger.log('Track event (fake)', { eventName, eventData });
+      // In a real implementation, this would send tracking data
+      // For fake/demo purposes, we just log it
+    };
+  }
+
+  private createSetAPI(): any {
+    const self = this;
+    return function set(key: string, value: any) {
+      self.logger.log('Set property (fake)', { key, value });
+      // In a real implementation, this would set zaraz properties
+      // For fake/demo purposes, we just log it
+    };
+  }
+
+  private createEcommerceAPI(): any {
+    const self = this;
+    return {
+      purchase: (data: any) => {
+        self.logger.log('Ecommerce purchase (fake)', data);
+        // In a real implementation, this would handle ecommerce tracking
+      },
+      addToCart: (data: any) => {
+        self.logger.log('Ecommerce add to cart (fake)', data);
+      },
+      // Add other ecommerce methods as needed
+    };
   }
 }
