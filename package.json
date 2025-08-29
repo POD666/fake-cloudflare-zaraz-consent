@@ -1,6 +1,6 @@
 {
   "name": "fake-cloudflare-zaraz-consent",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Local development tool for Cloudflare Zaraz consent management with fake instance and consent dialog",
   "main": "dist/index.js",
   "module": "dist/index.js",
