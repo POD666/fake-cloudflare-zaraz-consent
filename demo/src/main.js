@@ -1,5 +1,5 @@
 import './style.css'
-import { initFakeZaraz } from 'fake-cloudflare-zaraz-consent'
+import { initFakeZaraz, isFakeZaraz } from 'fake-cloudflare-zaraz-consent'
 
 // Initialize Zaraz Consent Tools with demo configuration
 initFakeZaraz({
@@ -54,17 +54,7 @@ initFakeZaraz({
 
 console.log('✅ Zaraz Consent Tools initialized')
 
-// Hide loading indicator and initialize demo
-document.addEventListener('DOMContentLoaded', () => {
-  initDemo()
-})
-
-// If DOM is already loaded, initialize immediately
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initDemo)
-} else {
-  initDemo()
-}
+initDemo();
 
 function initDemo() {
   // Hide loading indicator

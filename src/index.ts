@@ -9,7 +9,12 @@ export * from './utils.js';
 import { getZaraz } from 'zaraz-ts/build/helpers/get-zaraz.js';
 import { FakeZaraz } from './fake-zaraz.js';
 import { ZarazConfig } from './types.js';
-import { isBrowserEnvironment, createLogger, ERROR_MESSAGES } from './utils.js';
+import {
+  isBrowserEnvironment,
+  createLogger,
+  ERROR_MESSAGES,
+  isFakeZaraz,
+} from './utils.js';
 
 const logger = createLogger('Zaraz Consent Tools', true);
 
@@ -40,14 +45,18 @@ export function initFakeZaraz(config: Partial<ZarazConfig> = {}): FakeZaraz {
  * @returns The current FakeZaraz instance or null if not initialized
  */
 export function getFakeZaraz(): FakeZaraz | null {
-  return getZaraz();
+  const fakeZaraz = getZaraz();
+  if (fakeZaraz && !isFakeZaraz(fakeZaraz)) {
+    throw new Error(ERROR_MESSAGES.NOT_FAKE_INSTANCE);
+  }
+  return fakeZaraz;
 }
 
 /**
  * Clean up the global Zaraz instance
  */
 export function cleanupFakeZaraz(): void {
-  const zaraz = (window as any).zaraz;
+  const zaraz = getFakeZaraz();
   if (zaraz && zaraz.clearStorage) {
     zaraz.clearStorage();
   }
@@ -57,25 +66,4 @@ export function cleanupFakeZaraz(): void {
   }
 
   logger.log('Cleaned up');
-}
-
-/**
- * Quick setup function for common use cases
- * Creates a Zaraz instance with sensible defaults for local development
- */
-export function quickSetup(
-  options: {
-    autoShow?: boolean;
-    enableLogging?: boolean;
-    customPurposes?: any[];
-  } = {}
-): FakeZaraz {
-  const config: Partial<ZarazConfig> = {
-    enableLogging: options.enableLogging !== false, // default to true
-    autoShow: options.autoShow || false,
-    enableModal: true,
-    ...(options.customPurposes && { purposes: options.customPurposes }),
-  };
-
-  return initFakeZaraz(config);
 }

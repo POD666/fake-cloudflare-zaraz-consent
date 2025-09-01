@@ -57,6 +57,7 @@ export const ERROR_MESSAGES = {
   API_NOT_READY: 'Zaraz Consent API is not ready',
   INVALID_PURPOSE: 'Invalid purpose ID provided',
   METHOD_NOT_AVAILABLE: 'Method not available in current Zaraz instance',
+  NOT_FAKE_INSTANCE: 'Zaraz instance is not a fake implementation',
 } as const;
 
 /**
@@ -135,4 +136,17 @@ export async function retryWithBackoff<T>(
   }
 
   throw lastError;
+}
+
+/**
+ * Check if the passed zaraz instance is a fake implementation
+ * @param zaraz The zaraz instance to check
+ * @returns True if the instance is a fake implementation, false otherwise
+ */
+export function isFakeZaraz(zaraz: any): boolean {
+  if (!zaraz) {
+    return false;
+  }
+
+  return zaraz.constructor.name.includes('Fake');
 }
