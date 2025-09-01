@@ -1,0 +1,22 @@
+{
+  "name": "fake-cloudflare-zaraz-consent-demo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47",
+    "@tailwindcss/vite": "^4.1.12"
+  },
+  "dependencies": {
+    "fake-cloudflare-zaraz-consent": "file:../",
+    "zaraz-ts": "^1.2.0",
+    "tailwindcss": "^4.1.12"
+  }
+}

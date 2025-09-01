@@ -5,7 +5,7 @@ const COOKIE_DURATION = 365; // days
 export class ConsentStorage {
   private cookieName: string;
 
-  constructor(cookieName: string = 'cf_consent') {
+  constructor(cookieName: string) {
     this.cookieName = cookieName;
   }
 

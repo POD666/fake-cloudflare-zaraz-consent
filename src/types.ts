@@ -16,6 +16,7 @@ export interface Purpose {
   name: string;
   description: string;
   order: number;
+  // Custom prop, CF doesn't have it
   required?: boolean;
 }
 
@@ -27,6 +28,7 @@ export interface ZarazConsentAPI extends BaseZarazConsent {
 }
 
 // Extend the base zaraz type with our consent API
+// TODO: contribute to zaraz-ts
 export interface ZarazGlobal extends Omit<typeof zaraz, 'consent'> {
   consent: ZarazConsentAPI;
   showConsentModal?: () => void;

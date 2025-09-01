@@ -17,15 +17,11 @@
     "dev": "tsc --watch",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist",
-    "demo": "npx serve demo -l 3000",
-    "demo:dev": "npm run build && cp -r dist demo/ && npm run dev & npm run demo",
-    "demo:build": "npm run build && node scripts/build-demo.js",
-    "prepublishOnly": "npm run clean && npm run build",
+    "demo:dev": "cd demo && npm run dev",
+    "demo:install": "cd demo && npm install",
+    "demo:build": "cd demo && npm run build",
     "test": "echo \"No tests yet\" && exit 0",
     "release": "np",
-    "release:patch": "np patch",
-    "release:minor": "np minor",
-    "release:major": "np major",
     "release:dry": "np --dry-run"
   },
   "repository": {
@@ -71,8 +67,7 @@
   "files": [
     "dist/",
     "README.md",
-    "LICENSE",
-    "demo/"
+    "LICENSE"
   ],
   "publishConfig": {
     "access": "public"

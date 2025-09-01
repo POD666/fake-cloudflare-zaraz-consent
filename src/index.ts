@@ -5,9 +5,6 @@ export * from './modal.js';
 export * from './fake-zaraz.js';
 export * from './utils.js';
 
-// Re-export zaraz-ts functions for Node.js environments
-export * from 'zaraz-ts';
-
 // Import the getZaraz helper from zaraz-ts
 import { getZaraz } from 'zaraz-ts/build/helpers/get-zaraz.js';
 import { FakeZaraz } from './fake-zaraz.js';
@@ -22,9 +19,7 @@ const logger = createLogger('Zaraz Consent Tools', true);
  * @param config Configuration options for the fake Zaraz instance
  * @returns The created FakeZaraz instance
  */
-export function initializeZarazConsentTools(
-  config: Partial<ZarazConfig> = {}
-): FakeZaraz {
+export function initFakeZaraz(config: Partial<ZarazConfig> = {}): FakeZaraz {
   if (!isBrowserEnvironment()) {
     throw new Error(ERROR_MESSAGES.NOT_BROWSER);
   }
@@ -44,14 +39,14 @@ export function initializeZarazConsentTools(
  * Get the current global Zaraz instance
  * @returns The current FakeZaraz instance or null if not initialized
  */
-export function getZarazConsentTools(): FakeZaraz | null {
+export function getFakeZaraz(): FakeZaraz | null {
   return getZaraz();
 }
 
 /**
  * Clean up the global Zaraz instance
  */
-export function cleanupZarazConsentTools(): void {
+export function cleanupFakeZaraz(): void {
   const zaraz = (window as any).zaraz;
   if (zaraz && zaraz.clearStorage) {
     zaraz.clearStorage();
@@ -82,5 +77,5 @@ export function quickSetup(
     ...(options.customPurposes && { purposes: options.customPurposes }),
   };
 
-  return initializeZarazConsentTools(config);
+  return initFakeZaraz(config);
 }

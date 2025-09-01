@@ -102,41 +102,6 @@ export function dispatchCustomEvent(
 }
 
 /**
- * Common default purposes for demos and testing
- */
-export const DEMO_PURPOSES = [
-  {
-    id: 'functional',
-    name: 'Essential Cookies',
-    description:
-      'Necessary for the website to function properly. These cannot be disabled.',
-    order: 1,
-    required: true,
-  },
-  {
-    id: 'analytics',
-    name: 'Analytics & Performance',
-    description:
-      'Help us understand how visitors interact with our website by collecting usage data.',
-    order: 2,
-  },
-  {
-    id: 'marketing',
-    name: 'Marketing & Advertising',
-    description:
-      'Used to deliver personalized advertisements and measure their effectiveness.',
-    order: 3,
-  },
-  {
-    id: 'preferences',
-    name: 'Preferences & Personalization',
-    description:
-      'Remember your settings and preferences to enhance your experience.',
-    order: 4,
-  },
-];
-
-/**
  * Async timeout utility
  */
 export function delay(ms: number): Promise<void> {

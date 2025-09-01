@@ -66,7 +66,6 @@ import {
   quickSetup,
   initializeZarazConsentTools,
   // Shared utilities
-  DEMO_PURPOSES,
   createLogger,
 } from 'fake-cloudflare-zaraz-consent';
 

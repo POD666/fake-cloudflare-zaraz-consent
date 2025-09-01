@@ -4,516 +4,255 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zaraz Consent Tools Demo</title>
-    <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 15px;
-            line-height: 1.6;
-        }
-
-        @media (min-width: 768px) {
-            body {
-                padding: 20px;
-            }
-        }
-        .status {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
-            border-left: 4px solid #007bff;
-        }
-        .consent-controls {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-            margin: 20px 0;
-        }
-
-        @media (min-width: 768px) {
-            .consent-controls {
-                grid-template-columns: 1fr 1fr;
-                grid-template-rows: 1fr 1fr;
-            }
-        }
-        .control-group {
-            background: white;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #dee2e6;
-        }
-
-        @media (min-width: 768px) {
-            .control-group {
-                padding: 15px;
-            }
-        }
-        .control-group h3 {
-            margin-top: 0;
-            color: #495057;
-        }
-        .code-snippet {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 4px;
-            padding: 6px 8px;
-            margin: 8px 0;
-            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-            font-size: 10px;
-            color: #495057;
-            overflow-x: auto;
-            white-space: pre-wrap;
-            word-break: normal;
-        }
-
-        @media (min-width: 768px) {
-            .code-snippet {
-                padding: 8px 12px;
-                font-size: 11px;
-            }
-        }
-        .button-with-code {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-        .button-row {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        button {
-            background: #007bff;
-            color: white;
-            border: none;
-            padding: 10px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin: 3px 3px 3px 0;
-            font-size: 14px;
-            min-height: 40px;
-        }
-
-        @media (min-width: 768px) {
-            button {
-                padding: 8px 16px;
-                margin: 5px 5px 5px 0;
-                min-height: auto;
-            }
-        }
-        button:hover {
-            background: #0056b3;
-        }
-        button.secondary {
-            background: #6c757d;
-        }
-        button.secondary:hover {
-            background: #545b62;
-        }
-        button.danger {
-            background: #dc3545;
-        }
-        button.danger:hover {
-            background: #c82333;
-        }
-        .logs {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 10px;
-            max-height: 250px;
-            overflow-y: auto;
-            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-            font-size: 11px;
-        }
-
-        @media (min-width: 768px) {
-            .logs {
-                padding: 15px;
-                max-height: 300px;
-                font-size: 12px;
-            }
-        }
-        .log-entry {
-            margin: 5px 0;
-            padding: 2px 0;
-        }
-        .log-info { color: #007bff; }
-        .log-warn { color: #fd7e14; }
-        .log-error { color: #dc3545; }
-    </style>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 </head>
-<body>
-    <h1>🍪 Fake Cloudflare Zaraz Consent - Live Demo</h1>
-    <p>This demo demonstrates all features of the fake Zaraz consent management system for local development.</p>
+<body class="bg-slate-50">
+    <div class="min-h-screen">
+        <div class="max-w-6xl mx-auto p-4 lg:p-6">
+            <h1 class="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
+                🍪 Fake Cloudflare Zaraz Consent - Live Demo
+            </h1>
+            <p class="text-slate-700 mb-6">
+                This demo demonstrates all features of the fake Zaraz consent management system for local development.
+            </p>
 
-    <div style="background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 6px; padding: 12px; margin: 20px 0;">
-        <strong>📚 API Reference:</strong> This demo implements the official
-        <a href="https://developers.cloudflare.com/zaraz/consent-management/api/" target="_blank" style="color: #0ea5e9; text-decoration: none;">
-            Cloudflare Zaraz Consent API
-        </a>
-        - all code examples below work with real Zaraz in production.
-    </div>
-
-    <div style="background: #f0fdf4; border: 1px solid #22c55e; border-radius: 6px; padding: 12px; margin: 20px 0;">
-        <strong>📦 Installation:</strong> Add this package to your local development setup:<br>
-        <div style="background: #000; color: #00ff00; padding: 8px; margin: 8px 0; border-radius: 4px; font-family: monospace; font-size: 14px;">
-            npm install fake-cloudflare-zaraz-consent
-        </div>
-        <div style="margin-top: 8px;">
-            <strong>🔗 Links:</strong>
-            <a href="https://github.com/POD666/fake-cloudflare-zaraz-consent" target="_blank" style="color: #22c55e; text-decoration: none; margin-right: 15px;">
-                GitHub Repository
-            </a>
-            <a href="https://www.npmjs.com/package/fake-cloudflare-zaraz-consent" target="_blank" style="color: #22c55e; text-decoration: none;">
-                npm Package
-            </a>
-        </div>
-    </div>    <div class="status" id="status">
-        <h3>Fake Zaraz Status</h3>
-        <div id="status-content">Initializing...</div>
-        <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 15px;">
-            <div class="code-snippet">// Check API readiness
-if (window.zaraz?.consent?.APIReady) {
-  const allConsent = window.zaraz.consent.getAll();
-}</div>
-            <div class="code-snippet" id="api-result">// Result will appear here...</div>
-        </div>
-        <style>
-            @media (min-width: 768px) {
-                .status div[style*="grid-template-columns: 1fr"] {
-                    grid-template-columns: 1fr 1fr !important;
-                    gap: 15px !important;
-                }
-            }
-        </style>
-    </div>
-
-    <div class="consent-controls">
-        <div class="control-group">
-            <h3>Modal Controls</h3>
-            <div class="button-with-code">
-                <div class="button-row">
-                    <button onclick="showModal()">Show Consent Modal</button>
-                </div>
-                <div class="code-snippet">window.zaraz.consent.modal = true;</div>
+            <!-- Loading indicator -->
+            <div id="loading" class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
+                <div class="text-blue-800">⏳ Loading demo...</div>
             </div>
 
-            <div class="button-with-code">
-                <div class="button-row">
-                    <button onclick="hideModal()" class="secondary">Hide Modal</button>
+            <!-- Info Boxes -->
+            <div class="space-y-4 mb-8">
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <strong class="text-blue-800">📚 API Reference:</strong> This demo implements the official
+                    <a
+                        href="https://developers.cloudflare.com/zaraz/consent-management/api/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="text-blue-600 underline hover:text-blue-800"
+                    >
+                        Cloudflare Zaraz Consent API
+                    </a>
+                    - all code examples below work with real Zaraz in production.
                 </div>
-                <div class="code-snippet">window.zaraz.consent.modal = false;</div>
-            </div>
-        </div>
 
-        <div class="control-group">
-            <h3>Quick Actions</h3>
-            <div class="button-with-code">
-                <div class="button-row">
-                    <button onclick="acceptAll()">Accept All</button>
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <strong class="text-green-800">📦 Installation:</strong> Add this package to your local development setup:
+                    <div class="bg-black text-green-400 p-3 mt-2 rounded font-mono text-sm">
+                        npm install fake-cloudflare-zaraz-consent
+                    </div>
+                    <div class="mt-2">
+                        <strong class="text-green-800">🔗 Links:</strong>
+                        <a
+                            href="https://github.com/POD666/fake-cloudflare-zaraz-consent"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="text-green-600 underline hover:text-green-800 mr-4"
+                        >
+                            GitHub Repository
+                        </a>
+                        <a
+                            href="https://www.npmjs.com/package/fake-cloudflare-zaraz-consent"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="text-green-600 underline hover:text-green-800"
+                        >
+                            npm Package
+                        </a>
+                    </div>
                 </div>
-                <div class="code-snippet">window.zaraz.consent.setAll(true);</div>
             </div>
 
-            <div class="button-with-code">
-                <div class="button-row">
-                    <button onclick="rejectAll()" class="danger">Reject All</button>
+            <!-- Status -->
+            <div id="status" class="bg-white border border-slate-200 rounded-lg p-6 mb-8 border-l-4 border-l-blue-500">
+                <h3 class="text-xl font-semibold text-slate-800 mb-4">Fake Zaraz Status</h3>
+                <div id="status-content" class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Will be populated by JS -->
                 </div>
-                <div class="code-snippet">window.zaraz.consent.setAll(false);</div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div id="code-example" class="bg-slate-100 border border-slate-300 rounded px-3 py-2 font-mono text-xs text-slate-700 overflow-x-auto whitespace-pre-wrap">
+                        <!-- Will be populated by JS -->
+                    </div>
+                    <div id="status-output" class="bg-slate-100 border border-slate-300 rounded px-3 py-2 font-mono text-xs text-slate-700 overflow-x-auto whitespace-pre-wrap">
+                        <!-- Will be populated by JS -->
+                    </div>
+                </div>
             </div>
 
-            <div class="button-with-code">
-                <div class="button-row">
-                    <button onclick="resetConsent()" class="secondary">Reset Consent</button>
+            <!-- Controls Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- Modal Controls -->
+                <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-4">Modal Controls</h3>
+                    <div class="space-y-4">
+                        <div class="space-y-2">
+                            <button id="show-modal" class="px-4 py-2 rounded font-medium transition-colors bg-blue-600 text-white hover:bg-blue-700">
+                                Show Consent Modal
+                            </button>
+                            <div class="bg-slate-100 border border-slate-300 rounded px-3 py-2 font-mono text-xs text-slate-700 overflow-x-auto whitespace-pre-wrap">// Using zaraz-ts
+import { showConsentModal } from 'zaraz-ts';
+showConsentModal();</div>
+                        </div>
+                        <div class="space-y-2">
+                            <button id="hide-modal" class="px-4 py-2 rounded font-medium transition-colors bg-slate-600 text-white hover:bg-slate-700">
+                                Hide Modal
+                            </button>
+                            <div class="bg-slate-100 border border-slate-300 rounded px-3 py-2 font-mono text-xs text-slate-700 overflow-x-auto whitespace-pre-wrap">window.zaraz.consent.modal = false;</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="code-snippet">window.zaraz.consent.set({
+
+                <!-- Quick Actions -->
+                <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-4">Quick Actions</h3>
+                    <div class="space-y-4">
+                        <div class="space-y-2">
+                            <button id="accept-all" class="px-4 py-2 rounded font-medium transition-colors bg-blue-600 text-white hover:bg-blue-700">
+                                Accept All
+                            </button>
+                            <div class="bg-slate-100 border border-slate-300 rounded px-3 py-2 font-mono text-xs text-slate-700 overflow-x-auto whitespace-pre-wrap">// Using zaraz-ts
+import { acceptAllConsent } from 'zaraz-ts';
+acceptAllConsent();</div>
+                        </div>
+                        <div class="space-y-2">
+                            <button id="reject-all" class="px-4 py-2 rounded font-medium transition-colors bg-red-600 text-white hover:bg-red-700">
+                                Reject All
+                            </button>
+                            <div class="bg-slate-100 border border-slate-300 rounded px-3 py-2 font-mono text-xs text-slate-700 overflow-x-auto whitespace-pre-wrap">// Using zaraz-ts
+import { rejectAllConsent } from 'zaraz-ts';
+rejectAllConsent();</div>
+                        </div>
+                        <div class="space-y-2">
+                            <button id="reset-consent" class="px-4 py-2 rounded font-medium transition-colors bg-slate-600 text-white hover:bg-slate-700">
+                                Reset Consent
+                            </button>
+                            <div class="bg-slate-100 border border-slate-300 rounded px-3 py-2 font-mono text-xs text-slate-700 overflow-x-auto whitespace-pre-wrap">window.zaraz.consent.set({
   functional: true,
   analytics: false,
   marketing: false,
   preferences: false
 });</div>
-            </div>
-        </div>
+                        </div>
+                    </div>
+                </div>
 
-        <div class="control-group">
-            <h3>Individual Purposes</h3>
-            <div id="purpose-controls">Loading...</div>
-            <div class="code-snippet">// Get consent for specific purpose
+                <!-- Individual Purposes -->
+                <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-4">Individual Purposes</h3>
+                    <div id="purposes-container" class="space-y-3">
+                        <!-- Will be populated by JS -->
+                    </div>
+                    <div class="bg-slate-100 border border-slate-300 rounded px-3 py-2 font-mono text-xs text-slate-700 overflow-x-auto whitespace-pre-wrap mt-4">// Get consent for specific purpose
 const hasAnalytics = window.zaraz.consent.get('analytics');
 
 // Set consent for specific purpose
-window.zaraz.consent.set({ analytics: true });</div>
-        </div>
+window.zaraz.consent.set({ analytics: true });
 
-        <div class="control-group">
-            <h3>Advanced</h3>
-            <div class="button-with-code">
-                <div class="button-row">
-                    <button onclick="sendQueuedEvents()">Send Queued Events</button>
+// Using zaraz-ts for conditional loading
+import { ifConsentGranted } from 'zaraz-ts';
+await ifConsentGranted('analytics', () => {
+  // Load analytics script
+  console.log('Analytics enabled');
+});</div>
                 </div>
-                <div class="code-snippet">window.zaraz.consent.sendQueuedEvents();</div>
-            </div>
 
-            <div class="button-with-code">
-                <div class="button-row">
-                    <button onclick="clearStorage()" class="danger">Clear Storage</button>
-                </div>
-                <div class="code-snippet">// Clear consent storage and reload
+                <!-- Advanced (zaraz-ts) -->
+                <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-4">Advanced (zaraz-ts)</h3>
+                    <div class="space-y-4">
+                        <div class="space-y-2">
+                            <button id="simulate-scripts" class="px-4 py-2 rounded font-medium transition-colors bg-blue-600 text-white hover:bg-blue-700">
+                                Simulate Script Loading
+                            </button>
+                            <div class="bg-slate-100 border border-slate-300 rounded px-3 py-2 font-mono text-xs text-slate-700 overflow-x-auto whitespace-pre-wrap">// Using zaraz-ts for conditional loading
+import { ifConsentGranted } from 'zaraz-ts';
+await ifConsentGranted('analytics', () => {
+  loadAnalyticsScript();
+});</div>
+                        </div>
+                        <div class="space-y-2">
+                            <button id="debug-consent" class="px-4 py-2 rounded font-medium transition-colors bg-blue-600 text-white hover:bg-blue-700">
+                                Debug Consent State
+                            </button>
+                            <div class="bg-slate-100 border border-slate-300 rounded px-3 py-2 font-mono text-xs text-slate-700 overflow-x-auto whitespace-pre-wrap">// Using zaraz-ts debug function
+import { debugConsentState } from 'zaraz-ts';
+await debugConsentState();</div>
+                        </div>
+                        <div class="space-y-2">
+                            <button id="test-advanced" class="px-4 py-2 rounded font-medium transition-colors bg-slate-600 text-white hover:bg-slate-700">
+                                Test Advanced Features
+                            </button>
+                            <div class="bg-slate-100 border border-slate-300 rounded px-3 py-2 font-mono text-xs text-slate-700 overflow-x-auto whitespace-pre-wrap">// Test zaraz-ts features
+import { getAllConsent, hasConsentBeenSet } from 'zaraz-ts';
+const consent = await getAllConsent();
+const isSet = await hasConsentBeenSet();</div>
+                        </div>
+                        <div class="space-y-2">
+                            <button id="send-queued" class="px-4 py-2 rounded font-medium transition-colors bg-blue-600 text-white hover:bg-blue-700">
+                                Send Queued Events
+                            </button>
+                            <div class="bg-slate-100 border border-slate-300 rounded px-3 py-2 font-mono text-xs text-slate-700 overflow-x-auto whitespace-pre-wrap">window.zaraz.consent.sendQueuedEvents();</div>
+                        </div>
+                        <div class="space-y-2">
+                            <button id="clear-storage" class="px-4 py-2 rounded font-medium transition-colors bg-red-600 text-white hover:bg-red-700">
+                                Clear Storage
+                            </button>
+                            <div class="bg-slate-100 border border-slate-300 rounded px-3 py-2 font-mono text-xs text-slate-700 overflow-x-auto whitespace-pre-wrap">// Clear consent storage and reload
 localStorage.removeItem('demo_consent');
 location.reload();</div>
-            </div>
-
-            <div class="button-with-code">
-                <div class="button-row">
-                    <button onclick="getConsentStatus()" class="secondary">Get All Consent</button>
+                        </div>
+                        <div class="space-y-2">
+                            <button id="get-consent" class="px-4 py-2 rounded font-medium transition-colors bg-slate-600 text-white hover:bg-slate-700">
+                                Get All Consent
+                            </button>
+                            <div class="bg-slate-100 border border-slate-300 rounded px-3 py-2 font-mono text-xs text-slate-700 overflow-x-auto whitespace-pre-wrap">// Using zaraz-ts
+import { getAllConsent } from 'zaraz-ts';
+const consent = await getAllConsent();
+console.log(consent);</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="code-snippet">const consent = window.zaraz.consent.getAll();
-console.log(consent); // Check browser console</div>
             </div>
-        </div>
-    </div>
 
-    <div>
-        <h3>Console Logs & Events</h3>
-        <div class="code-snippet">// Listen for consent events
+            <!-- Logs -->
+            <div class="bg-white border border-slate-200 rounded-lg p-6">
+                <h3 class="text-xl font-semibold text-slate-800 mb-4">Console Logs & Events</h3>
+                <div class="bg-slate-100 border border-slate-300 rounded px-3 py-2 font-mono text-xs text-slate-700 overflow-x-auto whitespace-pre-wrap mb-4">// Listen for consent events (traditional)
 document.addEventListener('zarazConsentAPIReady', () => {
   console.log('Zaraz Consent API is ready');
 });
 
-document.addEventListener('zarazConsentChoicesUpdated', () => {
-  console.log('Consent choices updated');
-});</div>
-        <div class="logs" id="logs">
-            <div class="log-entry log-info">Logs will appear here...</div>
+// Using zaraz-ts for consent changes
+import { onConsentChange } from 'zaraz-ts';
+const unsubscribe = onConsentChange((consent) => {
+  console.log('Consent updated:', consent);
+});
+
+// Global tools available in console
+window.zarazConsentTools.debug();
+window.zarazConsentTools.getAll();</div>
+                <div id="loaded-scripts" class="mb-4 p-3 bg-green-50 border border-green-200 rounded hidden">
+                    <strong class="text-green-800">📦 Simulated Loaded Scripts:</strong>
+                    <ul id="scripts-list" class="mt-2 list-disc list-inside text-sm text-green-700">
+                        <!-- Will be populated by JS -->
+                    </ul>
+                </div>
+                <div id="global-tools-status" class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded hidden">
+                    <strong class="text-blue-800">🛠️ Global Tools Enabled:</strong>
+                    <div class="mt-2 text-sm text-blue-700">
+                        Open browser console (F12) and try: <code class="bg-blue-100 px-1 rounded">window.zarazConsentTools.debug()</code>
+                    </div>
+                </div>
+                <div id="logs" class="bg-slate-100 border border-slate-300 rounded p-4 max-h-64 overflow-y-auto font-mono text-sm">
+                    <div class="text-blue-600 py-1">Logs will appear here...</div>
+                </div>
+                <button id="clear-logs" class="mt-4 px-4 py-2 rounded font-medium transition-colors bg-slate-600 text-white hover:bg-slate-700">
+                    Clear Logs
+                </button>
+            </div>
         </div>
-        <button onclick="clearLogs()" class="secondary">Clear Logs</button>
     </div>
 
-    <script type="module">
-        // Import the actual built zaraz consent tools
-        import {
-            initializeZarazConsentTools
-        } from './dist/index.js';        // Initialize the real Zaraz consent tools
-        const zaraz = initializeZarazConsentTools({
-            purposes: [
-                {
-                    id: 'functional',
-                    name: 'Essential Cookies',
-                    description: 'Necessary for the website to function properly. These cannot be disabled.',
-                    order: 1,
-                    required: true,
-                },
-                {
-                    id: 'analytics',
-                    name: 'Analytics & Performance',
-                    description: 'Help us understand how visitors interact with our website by collecting usage data.',
-                    order: 2,
-                },
-                {
-                    id: 'marketing',
-                    name: 'Marketing & Advertising',
-                    description: 'Used to deliver personalized advertisements and measure their effectiveness.',
-                    order: 3,
-                },
-                {
-                    id: 'preferences',
-                    name: 'Preferences & Personalization',
-                    description: 'Remember your settings and preferences to enhance your experience.',
-                    order: 4,
-                },
-            ],
-            defaultConsent: {
-                functional: true,
-                analytics: false,
-                marketing: false,
-                preferences: false,
-            },
-            enableLogging: true,
-            enableModal: true,
-            modalConfig: {
-                title: 'Cookie Preferences',
-                description: 'We use cookies to improve your experience and analyze site usage. Please choose which types of cookies you want to allow.',
-                acceptAllText: 'Accept All Cookies',
-                rejectAllText: 'Reject Non-Essential',
-                saveText: 'Save My Preferences',
-                closeText: 'Close',
-                theme: 'light',
-                position: 'center',
-            },
-            cookieName: 'demo_consent',
-            autoShow: false,
-        });
-
-        // Custom logging for demo
-        const originalConsoleLog = console.log;
-        console.log = function(...args) {
-            originalConsoleLog.apply(console, args);
-
-            // Add to demo logs if it's from our package
-            if (args[0] && typeof args[0] === 'string' && args[0].includes('[Zaraz Consent Tools]')) {
-                const logsContainer = document.getElementById('logs');
-                const logElement = document.createElement('div');
-                logElement.className = 'log-entry log-info';
-                logElement.textContent = args.join(' ');
-                logsContainer.appendChild(logElement);
-                logsContainer.scrollTop = logsContainer.scrollHeight;
-            }
-        };
-
-        // Wait for API to be ready and then update display
-        let isReady = false;
-
-        const checkReady = () => {
-            if (window.zaraz?.consent?.APIReady) {
-                isReady = true;
-                updateDisplay();
-            } else {
-                setTimeout(checkReady, 50);
-            }
-        };
-
-        // Start checking
-        checkReady();
-
-        // Listen for consent changes via events
-        document.addEventListener('zarazConsentChoicesUpdated', () => {
-            updateDisplay();
-        });
-
-        // Event listeners for Zaraz events
-        document.addEventListener('zarazConsentAPIReady', () => {
-            console.log('🎉 Zaraz Consent API Ready!');
-            isReady = true;
-            updateDisplay();
-        });
-
-        document.addEventListener('zarazConsentChoicesUpdated', () => {
-            console.log('🔄 Consent choices updated!');
-            updateDisplay();
-        });
-
-        // Global functions for buttons
-        window.showModal = () => {
-            if (window.zaraz?.consent) {
-                window.zaraz.consent.modal = true;
-            }
-        };
-
-        window.hideModal = () => {
-            if (window.zaraz?.consent) {
-                window.zaraz.consent.modal = false;
-            }
-        };
-
-        window.acceptAll = () => {
-            if (window.zaraz?.consent) {
-                window.zaraz.consent.setAll(true);
-            }
-        };
-
-        window.rejectAll = () => {
-            if (window.zaraz?.consent) {
-                window.zaraz.consent.setAll(false);
-            }
-        };
-
-        window.resetConsent = () => {
-            if (window.zaraz?.consent?.set) {
-                window.zaraz.consent.set({
-                    functional: true,
-                    analytics: false,
-                    marketing: false,
-                    preferences: false
-                });
-            }
-        };
-
-        window.sendQueuedEvents = () => {
-            if (window.zaraz?.consent?.sendQueuedEvents) {
-                window.zaraz.consent.sendQueuedEvents();
-            }
-        };
-
-        window.clearStorage = () => {
-            if (window.zaraz?.clearStorage) {
-                window.zaraz.clearStorage();
-            }
-            localStorage.removeItem('demo_consent');
-            location.reload();
-        };
-
-        window.getConsentStatus = () => {
-            const consent = window.zaraz.consent.getAll();
-            console.log('Current consent status:', consent);
-            alert('Consent status logged to console (F12)');
-        };
-
-        window.toggleLogging = () => {
-            console.log('[Zaraz Consent Tools] Logging toggle (always enabled in demo)');
-        };
-
-        window.clearLogs = () => {
-            document.getElementById('logs').innerHTML = '<div class="log-entry log-info">Logs cleared...</div>';
-        };
-
-        window.togglePurpose = (purposeId) => {
-            if (window.zaraz?.consent) {
-                const current = window.zaraz.consent.get(purposeId);
-                window.zaraz.consent.set({ [purposeId]: !current });
-            }
-        };
-
-        function updateDisplay() {
-            if (!isReady || !window.zaraz?.consent?.APIReady) {
-                document.getElementById('status-content').innerHTML = '<em>Initializing...</em>';
-                document.getElementById('api-result').innerHTML = '// API not ready yet...';
-                return;
-            }
-
-            // Update status
-            const statusContent = document.getElementById('status-content');
-            const consent = window.zaraz.consent.getAll();
-
-            statusContent.innerHTML = `
-                <strong>API Ready:</strong> ${window.zaraz.consent.APIReady ? '✅ Yes' : '❌ No'}<br>
-                <strong>Modal Visible:</strong> ${window.zaraz.consent.modal ? '✅ Yes' : '❌ No'}
-            `;
-
-            // Update API result
-            const apiResult = document.getElementById('api-result');
-            apiResult.innerHTML = `// API Ready: ${window.zaraz.consent.APIReady}
-// All Consent:
-${JSON.stringify(consent, null, 2)}`;
-
-            // Update purpose controls
-            const purposeControls = document.getElementById('purpose-controls');
-            const purposes = window.zaraz.consent.purposes;
-
-            if (purposes) {
-                purposeControls.innerHTML = Object.entries(purposes).map(([id, purpose]) => {
-                    const granted = consent[id];
-                    const disabled = purpose.required ? 'disabled' : '';
-                    return `
-                        <div class="button-with-code" style="margin-bottom: 8px;">
-                            <button onclick="togglePurpose('${id}')" ${disabled}
-                                    style="background: ${granted ? '#28a745' : '#dc3545'}; width: 100%; margin: 0; color: white; border: none; padding: 8px; border-radius: 4px; cursor: ${purpose.required ? 'not-allowed' : 'pointer'};">
-                                ${purpose.name}: ${granted ? 'ON' : 'OFF'}${purpose.required ? ' (Required)' : ''}
-                            </button>
-                            <div class="code-snippet">window.zaraz.consent.get('${id}'); // ${granted}
-window.zaraz.consent.set({ '${id}': ${!granted} });</div>
-                        </div>
-                    `;
-                }).join('');
-            }
-        }
-
-        // Initial display update
-        updateDisplay();
-    </script>
+    <script type="module" src="/src/main.js"></script>
 </body>
 </html>
