@@ -21,13 +21,13 @@ A development tool that provides a fake Cloudflare Zaraz consent management syst
 ### Installation
 
 ```bash
-npm install --save-dev fake-cloudflare-zaraz-consent
+npm install --save-dev @imviidx/fake-cloudflare-zaraz-consent
 ```
 
 ### Basic Usage
 
 ```typescript
-import { initFakeZaraz } from 'fake-cloudflare-zaraz-consent';
+import { initFakeZaraz } from '@imviidx/fake-cloudflare-zaraz-consent';
 
 // Initialize with default configuration
 const zaraz = initFakeZaraz();
@@ -44,7 +44,10 @@ This package works seamlessly with [zaraz-ts](https://www.npmjs.com/package/zara
 
 ```typescript
 // Import fake Zaraz setup functions
-import { initFakeZaraz, createLogger } from 'fake-cloudflare-zaraz-consent';
+import {
+  initFakeZaraz,
+  createLogger,
+} from '@imviidx/fake-cloudflare-zaraz-consent';
 
 // Import zaraz-ts for type-safe API access
 import { zaraz } from 'zaraz-ts';
@@ -86,7 +89,10 @@ npm run dev
 Initializes the fake Zaraz instance with optional configuration.
 
 ```typescript
-import { initFakeZaraz, ZarazConfig } from 'fake-cloudflare-zaraz-consent';
+import {
+  initFakeZaraz,
+  ZarazConfig,
+} from '@imviidx/fake-cloudflare-zaraz-consent';
 
 const config: Partial<ZarazConfig> = {
   purposes: [
@@ -194,7 +200,7 @@ const modalConfig = {
 ```typescript
 // Only load in development
 if (process.env.NODE_ENV === 'development') {
-  import('fake-cloudflare-zaraz-consent').then(({ initFakeZaraz }) => {
+  import('@imviidx/fake-cloudflare-zaraz-consent').then(({ initFakeZaraz }) => {
     initFakeZaraz({
       ...
     });
@@ -206,7 +212,7 @@ if (process.env.NODE_ENV === 'development') {
 
 ```typescript
 // Check if running fake vs real Zaraz
-import { isFakeZaraz } from 'fake-cloudflare-zaraz-consent';
+import { isFakeZaraz } from '@imviidx/fake-cloudflare-zaraz-consent';
 
 isFakeZaraz(window.zaraz);
 // true or false
