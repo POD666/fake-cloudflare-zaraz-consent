@@ -29,5 +29,5 @@
     "emitDecoratorMetadata": false
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "demo/**/*.html"]
+  "exclude": ["node_modules", "dist", "demo/*"]
 }

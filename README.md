@@ -1,11 +1,11 @@
 # 🍪 Fake Cloudflare Zaraz Consent
 
-[![npm version](https://badge.fury.io/js/fake-cloudflare-zaraz-consent.svg)](https://badge.fury.io/js/fake-cloudflare-zaraz-consent)
+[![npm version](https://badge.fury.io/js/@imviidx%2Ffake-cloudflare-zaraz-consent.svg)](https://badge.fury.io/js/@imviidx%2Ffake-cloudflare-zaraz-consent)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 A development tool that provides a fake Cloudflare Zaraz consent management system for local development. Perfect for testing consent-dependent features without requiring a live Zaraz instance.
 
-**🌐 [Try the online demo →](https://pod666.github.io/fake-cloudflare-zaraz-consent/)**
+**🌐 [Try the online demo →](https://imviidx.github.io/fake-cloudflare-zaraz-consent/)**
 
 > **📚 API Reference**: This package implements the official [Cloudflare Zaraz Consent Management API](https://developers.cloudflare.com/zaraz/consent-management/api/). All methods and behaviors match the production Zaraz consent system.
 
