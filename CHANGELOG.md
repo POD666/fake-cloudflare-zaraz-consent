@@ -19,6 +19,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Config:** Removed default purposes array, replaced with single example purpose
 - **Types:** Added comment indicating `required` prop is custom (not in Cloudflare's API)
 - **Types:** Enhanced type documentation for better developer experience
+
+### Improved
+
+- **Compatibility:** Improved TypeScript configuration for broader compatibility
+- **Compatibility:** Reduced Node.js requirement from >=18.0.0 to >=16.0.0
+- **Compatibility:** Updated TypeScript target from ES2020 to ES2018 for better browser support
+- **Build:** Added incremental compilation and build info caching for faster builds
+- **Build:** Enhanced compiler options for better output optimization
+- **Types:** Improved type checking with additional strict mode options
 - **Storage:** Removed default parameter from ConsentStorage constructor
 - **API:** Simplified function names for better developer experience
 - **Demo:** Complete rewrite using modern Vite + Tailwind CSS v4 stack
